@@ -11,10 +11,12 @@ import CoreLocation
 
 class ViewController: UIViewController {
 
+    @IBOutlet weak var searchValButton: UITextField!
     @IBOutlet weak var weatherImage: UIImageView!
     @IBOutlet weak var temperatureVal: UILabel!
     @IBOutlet weak var cityName: UILabel!
     @IBOutlet weak var citySeach: UITextField!
+    var cityNameEntered = ""
     
     let weatherManager = WeatherManager()
     let locationManager = CLLocationManager()
@@ -44,12 +46,14 @@ extension ViewController: UITextFieldDelegate {
     // search city names to get the weather data
     @IBAction func searchPressed(_ sender: UIButton) {
         weatherManager.getCityAPI(city: citySeach.text!)
+        cityNameEntered = citySeach.text!
         citySeach.endEditing(true)
     }
     
     // triggers when the user clicks done or return in keyboard
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         weatherManager.getCityAPI(city: citySeach.text!)
+        cityNameEntered = citySeach.text!
         citySeach.endEditing(true)
         return true
     }
@@ -86,6 +90,14 @@ extension ViewController: weatherProtocol {
     
     // if there comes any network error or data mismatch with the model
     func didFailUpdate(err: Error) {
+        DispatchQueue.main.async {
+            self.citySeach.text = self.cityNameEntered
+            let alert = UIAlertController(title: "City Name Invalid", message: "Please check the City Name entered", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { (_) in
+                print("No value associated with City Name")
+            }))
+            self.present(alert, animated: true, completion: nil)
+        }
         print(err)
     }
 
